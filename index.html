@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Trading Academy</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #17212B; color: #E8F0F8; min-height: 100vh; overflow-x: hidden; }
+.topbar { position: sticky; top: 0; z-index: 100; background: #232E3C; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+.topbar-logo { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #5BBAFF, #4CD9AC); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.topbar-title { font-size: 15px; font-weight: 600; }
+.topbar-sub { font-size: 12px; color: #7F8EA8; }
+.search-btn { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; background: #2B3A4A; border: none; color: #E8F0F8; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.search-bar { background: #232E3C; padding: 10px 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); display: none; }
+.search-bar input { width: 100%; background: #2B3A4A; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 9px 16px; color: #E8F0F8; font-size: 14px; outline: none; }
+.search-bar input::placeholder { color: #7F8EA8; }
+.tabs { background: #232E3C; display: flex; border-bottom: 0.5px solid rgba(255,255,255,0.08); overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn { flex: none; padding: 12px 18px; background: none; border: none; border-bottom: 2px solid transparent; color: #7F8EA8; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.tab-btn.active { border-bottom-color: #5BBAFF; color: #5BBAFF; }
+.content { padding: 16px; padding-bottom: 80px; }
+.view { display: none; }
+.view.active { display: block; }
+.banner { background: linear-gradient(135deg, #1a3050, #0d2235); border: 0.5px solid rgba(91,186,255,0.25); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+.banner h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.banner p { font-size: 13px; color: #7F8EA8; margin-bottom: 14px; }
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 500; }
+.badge-blue { background: rgba(91,186,255,0.15); border: 0.5px solid rgba(91,186,255,0.3); color: #5BBAFF; }
+.badge-green { background: rgba(76,217,172,0.15); border: 0.5px solid rgba(76,217,172,0.3); color: #4CD9AC; }
+.section-label { font-size: 11px; color: #7F8EA8; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; }
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.cat-card { background: #232E3C; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 14px; cursor: pointer; }
+.cat-card:active { background: #2B3A4A; }
+.cat-icon { font-size: 22px; margin-bottom: 6px; }
+.cat-title { font-size: 14px; font-weight: 600; }
+.cat-count { font-size: 12px; color: #7F8EA8; margin-top: 2px; }
+.cat-bar { margin-top: 10px; height: 3px; border-radius: 2px; }
+.cat-bar-inner { height: 100%; border-radius: 2px; }
+.view-header { margin-bottom: 14px; }
+.view-header h2 { font-size: 16px; font-weight: 600; }
+.view-header p { font-size: 13px; color: #7F8EA8; margin-top: 2px; }
+.video-card { background: #232E3C; border: 0.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; gap: 12px; cursor: pointer; text-decoration: none; color: inherit; }
+.video-card:active { background: #2B3A4A; }
+.video-thumb { width: 52px; height: 52px; border-radius: 10px; background: #2B3A4A; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.video-body { flex: 1; min-width: 0; }
+.video-title { font-size: 14px; font-weight: 500; line-height: 1.35; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.video-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.meta-pill { font-size: 11px; border-radius: 8px; padding: 2px 8px; }
+.pill-gray { background: rgba(127,142,168,0.15); color: #7F8EA8; }
+.pill-beginner { background: rgba(76,217,172,0.15); color: #4CD9AC; }
+.pill-intermediate { background: rgba(91,186,255,0.15); color: #5BBAFF; }
+.pill-advanced { background: rgba(245,200,66,0.15); color: #F5C842; }
+.video-date { font-size: 11px; color: #7F8EA8; flex-shrink: 0; align-self: flex-start; }
+.empty { text-align: center; padding: 40px 20px; color: #7F8EA8; font-size: 14px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #232E3C; border-top: 0.5px solid rgba(255,255,255,0.08); display: flex; padding: 8px 0 12px; }
+.nav-btn { flex: 1; background: none; border: none; color: #7F8EA8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.nav-btn.active { color: #5BBAFF; }
+.nav-icon { font-size: 20px; line-height: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">📈</div>
+  <div>
+    <div class="topbar-title">Trading Academy</div>
+    <div class="topbar-sub">Educational Hub</div>
+  </div>
+  <button class="search-btn" onclick="toggleSearch()">🔍</button>
+</div>
+
+<div class="search-bar" id="searchBar">
+  <input id="searchInput" type="search" placeholder="Search videos, topics..." oninput="doSearch()" />
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tab-home" onclick="switchTab('home')">Home</button>
+  <button class="tab-btn" id="tab-forex" onclick="switchTab('forex')">💱 Forex</button>
+  <button class="tab-btn" id="tab-crypto" onclick="switchTab('crypto')">🪙 Crypto</button>
+  <button class="tab-btn" id="tab-ichimoku" onclick="switchTab('ichimoku')">🌸 Ichimoku</button>
+  <button class="tab-btn" id="tab-pinned" onclick="switchTab('pinned')">📌 Pinned</button>
+</div>
+
+<div class="content">
+  <div class="view active" id="view-home">
+    <div class="banner">
+      <h2>Learn to Trade 📊</h2>
+      <p>Forex · Crypto · Ichimoku strategies</p>
+      <div class="badge-row">
+        <span class="badge badge-blue" id="totalCount">-- Videos</span>
+        <span class="badge badge-green">3 Channels</span>
+      </div>
+    </div>
+    <div class="section-label">Browse by category</div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="switchTab('forex')">
+        <div class="cat-icon">💱</div><div class="cat-title">Forex</div>
+        <div class="cat-count" id="forex-count">--</div>
+        <div class="cat-bar" style="background:rgba(91,186,255,0.15)"><div class="cat-bar-inner" style="width:60%;background:#5BBAFF"></div></div>
+      </div>
+      <div class="cat-card" onclick="switchTab('crypto')">
+        <div class="cat-icon">🪙</div><div class="cat-title">Crypto</div>
+        <div class="cat-count" id="crypto-count">--</div>
+        <div class="cat-bar" style="background:rgba(245,200,66,0.15)"><div class="cat-bar-inner" style="width:70%;background:#F5C842"></div></div>
+      </div>
+      <div class="cat-card" onclick="switchTab('ichimoku')">
+        <div class="cat-icon">🌸</div><div class="cat-title">Ichimoku</div>
+        <div class="cat-count" id="ichimoku-count">--</div>
+        <div class="cat-bar" style="background:rgba(255,107,107,0.15)"><div class="cat-bar-inner" style="width:40%;background:#FF6B6B"></div></div>
+      </div>
+      <div class="cat-card" onclick="switchTab('pinned')">
+        <div class="cat-icon">📌</div><div class="cat-title">Pinned</div>
+        <div class="cat-count" id="pinned-count">--</div>
+        <div class="cat-bar" style="background:rgba(76,217,172,0.15)"><div class="cat-bar-inner" style="width:25%;background:#4CD9AC"></div></div>
+      </div>
+    </div>
+    <div class="section-label">Recently added</div>
+    <div id="recent-list"></div>
+  </div>
+
+  <div class="view" id="view-forex">
+    <div class="view-header"><h2>💱 Forex Trading</h2><p>Fundamentals, price action &amp; pairs</p></div>
+    <div id="forex-list"></div>
+  </div>
+
+  <div class="view" id="view-crypto">
+    <div class="view-header"><h2>🪙 Crypto Trading</h2><p>Bitcoin, Altcoins, DeFi &amp; on-chain</p></div>
+    <div id="crypto-list"></div>
+  </div>
+
+  <div class="view" id="view-ichimoku">
+    <div class="view-header"><h2>🌸 Ichimoku System</h2><p>Kumo, Tenkan, Kijun &amp; signals</p></div>
+    <div id="ichimoku-list"></div>
+  </div>
+
+  <div class="view" id="view-pinned">
+    <div class="view-header"><h2>📌 Pinned Videos</h2><p>Must-watch for all students</p></div>
+    <div id="pinned-list"></div>
+  </div>
+
+  <div class="view" id="view-search">
+    <div class="section-label" id="search-label">Start typing to search...</div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="switchTab('home')"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-btn" id="nav-forex" onclick="switchTab('forex')"><span class="nav-icon">💱</span>Forex</button>
+  <button class="nav-btn" id="nav-crypto" onclick="switchTab('crypto')"><span class="nav-icon">🪙</span>Crypto</button>
+  <button class="nav-btn" id="nav-ichimoku" onclick="switchTab('ichimoku')"><span class="nav-icon">🌸</span>Ichimoku</button>
+</div>
+
+<script>
+// ============================================================
+// EDIT YOUR VIDEOS HERE
+// Replace link values with your real Telegram post URLs
+// Format: "https://t.me/YourChannelUsername/PostNumber"
+// Set pinned: true for videos shown in Pinned tab
+// ============================================================
+const videos = [
+  { category:"forex", title:"Introduction to Forex Markets", duration:"18:22", level:"Beginner", tag:"Basics", channel:"ForexFundamentals", date:"Apr 20", link:"https://t.me/YourForexChannel/1", pinned:true },
+  { category:"forex", title:"Understanding Currency Pairs", duration:"24:10", level:"Beginner", tag:"Basics", channel:"ForexFundamentals", date:"Apr 18", link:"https://t.me/YourForexChannel/2", pinned:false },
+  { category:"forex", title:"Reading Price Action Patterns", duration:"31:45", level:"Intermediate", tag:"Price Action", channel:"TradeSetups", date:"Apr 15", link:"https://t.me/YourForexChannel/3", pinned:false },
+  { category:"forex", title:"Support and Resistance Deep Dive", duration:"27:33", level:"Intermediate", tag:"Price Action", channel:"TradeSetups", date:"Apr 12", link:"https://t.me/YourForexChannel/4", pinned:false },
+  { category:"forex", title:"Risk Management in Forex", duration:"22:08", level:"Intermediate", tag:"Risk", channel:"ForexFundamentals", date:"Apr 10", link:"https://t.me/YourForexChannel/5", pinned:true },
+  { category:"forex", title:"EUR/USD Advanced Setups", duration:"35:50", level:"Advanced", tag:"Pairs", channel:"TradeSetups", date:"Apr 8", link:"https://t.me/YourForexChannel/6", pinned:false },
+  { category:"crypto", title:"Bitcoin Market Structure 2024", duration:"29:14", level:"Beginner", tag:"Bitcoin", channel:"CryptoAlpha", date:"Apr 22", link:"https://t.me/YourCryptoChannel/1", pinned:true },
+  { category:"crypto", title:"Altcoin Season Strategy", duration:"19:55", level:"Intermediate", tag:"Altcoins", channel:"CryptoAlpha", date:"Apr 20", link:"https://t.me/YourCryptoChannel/2", pinned:false },
+  { category:"crypto", title:"On-Chain Analysis Basics", duration:"26:30", level:"Intermediate", tag:"On-Chain", channel:"CryptoAlpha", date:"Apr 17", link:"https://t.me/YourCryptoChannel/3", pinned:false },
+  { category:"crypto", title:"DeFi Yield Opportunities", duration:"33:22", level:"Advanced", tag:"DeFi", channel:"CryptoAlpha", date:"Apr 14", link:"https://t.me/YourCryptoChannel/4", pinned:false },
+  { category:"crypto", title:"Crypto Risk vs Reward", duration:"21:40", level:"Beginner", tag:"Risk", channel:"TradeSetups", date:"Apr 11", link:"https://t.me/YourCryptoChannel/5", pinned:false },
+  { category:"crypto", title:"Smart Money Concepts in Crypto", duration:"38:05", level:"Advanced", tag:"SMC", channel:"TradeSetups", date:"Apr 9", link:"https://t.me/YourCryptoChannel/6", pinned:false },
+  { category:"ichimoku", title:"Ichimoku Cloud Explained", duration:"25:18", level:"Beginner", tag:"Intro", channel:"IchimokuMaster", date:"Apr 21", link:"https://t.me/YourIchimokuChannel/1", pinned:true },
+  { category:"ichimoku", title:"Tenkan and Kijun Crossovers", duration:"22:44", level:"Intermediate", tag:"Signals", channel:"IchimokuMaster", date:"Apr 16", link:"https://t.me/YourIchimokuChannel/2", pinned:false },
+  { category:"ichimoku", title:"Kumo Breakout Strategies", duration:"30:10", level:"Intermediate", tag:"Kumo", channel:"IchimokuMaster", date:"Apr 13", link:"https://t.me/YourIchimokuChannel/3", pinned:false },
+  { category:"ichimoku", title:"Chikou Span Analysis", duration:"18:55", level:"Advanced", tag:"Chikou", channel:"IchimokuMaster", date:"Apr 7", link:"https://t.me/YourIchimokuChannel/4", pinned:false },
+  { category:"ichimoku", title:"Ichimoku on Crypto Charts", duration:"28:30", level:"Advanced", tag:"Crypto", channel:"IchimokuMaster", date:"Apr 4", link:"https://t.me/YourIchimokuChannel/5", pinned:false }
+];
+
+const levelClass = { Beginner:"pill-beginner", Intermediate:"pill-intermediate", Advanced:"pill-advanced" };
+
+function videoCard(v) {
+  return '<a class="video-card" href="'+v.link+'" target="_blank"><div class="video-thumb">▶️</div><div class="video-body"><div class="video-title">'+v.title+'</div><div class="video-meta"><span class="meta-pill pill-gray">'+v.duration+'</span><span class="meta-pill '+(levelClass[v.level]||'pill-gray')+'">'+v.level+'</span><span class="meta-pill pill-gray">'+v.channel+'</span></div></div><div class="video-date">'+v.date+'</div></a>';
+}
+
+function renderList(id, arr) {
+  document.getElementById(id).innerHTML = arr.length ? arr.map(videoCard).join('') : '<div class="empty">No videos yet.</div>';
+}
+
+function buildAll() {
+  var forex=videos.filter(function(v){return v.category==='forex';});
+  var crypto=videos.filter(function(v){return v.category==='crypto';});
+  var ichimoku=videos.filter(function(v){return v.category==='ichimoku';});
+  var pinned=videos.filter(function(v){return v.pinned;});
+  var recent=videos.slice().reverse().slice(0,4);
+  renderList('forex-list',forex); renderList('crypto-list',crypto);
+  renderList('ichimoku-list',ichimoku); renderList('pinned-list',pinned);
+  renderList('recent-list',recent);
+  document.getElementById('forex-count').textContent=forex.length+' videos';
+  document.getElementById('crypto-count').textContent=crypto.length+' videos';
+  document.getElementById('ichimoku-count').textContent=ichimoku.length+' videos';
+  document.getElementById('pinned-count').textContent=pinned.length+' videos';
+  document.getElementById('totalCount').textContent=videos.length+' Videos';
+}
+
+var searchOpen=false;
+
+function switchTab(tab) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  var view=document.getElementById('view-'+tab); if(view) view.classList.add('active');
+  var tabBtn=document.getElementById('tab-'+tab); if(tabBtn) tabBtn.classList.add('active');
+  var navBtn=document.getElementById('nav-'+tab); if(navBtn) navBtn.classList.add('active');
+  if(tab!=='search'){document.getElementById('searchBar').style.display='none';document.getElementById('searchInput').value='';searchOpen=false;}
+}
+
+function toggleSearch() {
+  searchOpen=!searchOpen;
+  document.getElementById('searchBar').style.display=searchOpen?'block':'none';
+  if(searchOpen){switchTab('search');document.getElementById('searchInput').focus();}
+  else switchTab('home');
+}
+
+function doSearch() {
+  var q=document.getElementById('searchInput').value.toLowerCase().trim();
+  if(!q){document.getElementById('search-label').textContent='Start typing to search...';document.getElementById('search-results').innerHTML='';return;}
+  var results=videos.filter(function(v){return v.title.toLowerCase().indexOf(q)>-1||v.tag.toLowerCase().indexOf(q)>-1||v.level.toLowerCase().indexOf(q)>-1||v.channel.toLowerCase().indexOf(q)>-1||v.category.toLowerCase().indexOf(q)>-1;});
+  document.getElementById('search-label').textContent=results.length+' result'+(results.length!==1?'s':'')+' for "'+q+'"';
+  document.getElementById('search-results').innerHTML=results.length?results.map(videoCard).join(''):'<div class="empty">No videos found.</div>';
+}
+
+if(window.Telegram&&window.Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}
+buildAll();
+</script>
+</body>
+</html>
